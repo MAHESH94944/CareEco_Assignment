@@ -45,11 +45,25 @@ const Jobs = React.memo(() => {
   return (
     <div className="space-y-6">
       <Helmet>
-        <title>Jobs - Job Scheduler</title>
+        <title>Jobs Management - TaskCron | Scheduled Tasks & Automation</title>
         <meta
           name="description"
-          content="Manage and monitor your scheduled jobs with filtering and search capabilities."
+          content="Manage and monitor your scheduled jobs with TaskCron. Create, edit, delete, and execute automated tasks with advanced filtering and search capabilities."
         />
+        <meta
+          name="keywords"
+          content="job management, scheduled tasks, cron jobs, task automation, job scheduling, automated workflows"
+        />
+        <link rel="canonical" href="https://taskcron.onrender.com/jobs" />
+        <meta
+          property="og:title"
+          content="Jobs Management - TaskCron | Scheduled Tasks & Automation"
+        />
+        <meta
+          property="og:description"
+          content="Manage and monitor your scheduled jobs with TaskCron. Create, edit, delete, and execute automated tasks."
+        />
+        <meta property="og:url" content="https://taskcron.onrender.com/jobs" />
       </Helmet>
 
       <div className="flex items-center justify-between">

@@ -65,11 +65,37 @@ const Dashboard = React.memo(() => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
-        <title>Dashboard - Job Scheduler</title>
+        <title>Dashboard - TaskCron | Distributed Job Scheduling System</title>
         <meta
           name="description"
-          content="Monitor your distributed job scheduler performance with real-time statistics and worker status."
+          content="Monitor your distributed job scheduler performance with real-time statistics, worker status, and job execution analytics. TaskCron dashboard provides comprehensive insights into your automated tasks."
         />
+        <meta
+          name="keywords"
+          content="job scheduler dashboard, task monitoring, worker status, job analytics, cron dashboard, distributed system monitoring"
+        />
+        <link rel="canonical" href="https://taskcron.onrender.com/" />
+        <meta
+          property="og:title"
+          content="Dashboard - TaskCron | Distributed Job Scheduling System"
+        />
+        <meta
+          property="og:description"
+          content="Monitor your distributed job scheduler performance with real-time statistics, worker status, and job execution analytics."
+        />
+        <meta property="og:url" content="https://taskcron.onrender.com/" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "TaskCron Dashboard",
+            url: "https://taskcron.onrender.com/",
+            description:
+              "Real-time monitoring dashboard for distributed job scheduling system",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+          })}
+        </script>
       </Helmet>
 
       {/* Header Section */}

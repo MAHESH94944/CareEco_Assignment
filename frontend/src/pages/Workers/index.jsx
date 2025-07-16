@@ -14,10 +14,29 @@ const Workers = React.memo(() => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet>
-        <title>Workers - Job Scheduler</title>
+        <title>
+          Workers Management - TaskCron | Distributed Worker Cluster
+        </title>
         <meta
           name="description"
-          content="Monitor your distributed worker cluster with real-time status and capability information."
+          content="Monitor your distributed worker cluster with TaskCron. View real-time worker status, capabilities, and performance metrics for optimal job distribution."
+        />
+        <meta
+          name="keywords"
+          content="worker management, distributed system, cluster monitoring, worker status, job distribution, system performance"
+        />
+        <link rel="canonical" href="https://taskcron.onrender.com/workers" />
+        <meta
+          property="og:title"
+          content="Workers Management - TaskCron | Distributed Worker Cluster"
+        />
+        <meta
+          property="og:description"
+          content="Monitor your distributed worker cluster with real-time status and performance metrics."
+        />
+        <meta
+          property="og:url"
+          content="https://taskcron.onrender.com/workers"
         />
       </Helmet>
 

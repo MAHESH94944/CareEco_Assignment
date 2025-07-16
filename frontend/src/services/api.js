@@ -1,33 +1,57 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || "https://taskcron-backend.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000, // Increased timeout for better reliability
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor for logging
+// Request interceptor with performance optimization
 api.interceptors.request.use(
   (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    // Only log in development
+    if (import.meta.env.DEV) {
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    }
     return config;
   },
   (error) => {
-    console.error("Request error:", error);
+    if (import.meta.env.DEV) {
+      console.error("Request error:", error);
+    }
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor with caching
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Cache successful responses for 5 minutes
+    if (response.config.method === "get") {
+      const cacheKey = `${response.config.url}_${JSON.stringify(
+        response.config.params
+      )}`;
+      const cacheData = {
+        data: response.data,
+        timestamp: Date.now(),
+      };
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+    return response;
+  },
   (error) => {
-    console.error("API Error:", error.response?.data || error.message);
+    if (import.meta.env.DEV) {
+      console.error("API Error:", error.response?.data || error.message);
+    }
     const message =
       error.response?.data?.error || error.message || "An error occurred";
     return Promise.reject(new Error(message));
