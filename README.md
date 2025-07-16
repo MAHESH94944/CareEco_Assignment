@@ -64,8 +64,8 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/taskcron.git
-cd taskcron
+git clone https://github.com/MAHESH94944/CareEco_Assignment.git
+cd CareEco_Assignment
 ```
 
 ### 2. Backend Setup
@@ -193,7 +193,7 @@ The frontend will be available at `http://localhost:5173`
 ## 📁 Project Structure
 
 ```
-taskcron/
+CareEco_Assignment/
 ├── backend/                     # Node.js Backend
 │   ├── src/
 │   │   ├── controllers/         # Route controllers
