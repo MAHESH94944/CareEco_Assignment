@@ -1,11 +1,11 @@
-# Distributed Job Scheduler - Full Stack Application
+# TaskCron - Distributed Job Scheduling System
 
 A comprehensive distributed job scheduling system built with Node.js, Express, MongoDB backend and React.js frontend. This system can schedule and execute jobs with cron-like scheduling, dependency management, priority handling, and retry policies across a cluster of worker machines.
 
 ## 🚀 Live Demo
 
-- **Frontend**: [https://job-scheduler-frontend.onrender.com](https://job-scheduler-frontend.onrender.com)
-- **Backend API**: [https://job-scheduler-backend.onrender.com](https://job-scheduler-backend.onrender.com)
+- **Frontend**: [https://taskcron-frontend.onrender.com](https://taskcron-frontend.onrender.com)
+- **Backend API**: [https://careeco-assignment-r5mw.onrender.com](https://careeco-assignment-r5mw.onrender.com)
 
 ## 🎯 Features
 
@@ -20,7 +20,6 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 - **Persistent Storage**: MongoDB for job definitions and execution history
 - **RESTful API**: Complete CRUD operations for job management
 - **Real-time Monitoring**: Track job status and worker health
-- **Health Monitoring**: Advanced worker health tracking with consecutive failure detection
 
 ### Frontend Features
 
@@ -29,11 +28,8 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 - **Job Management**: Create, edit, delete, and execute jobs
 - **Worker Monitoring**: View worker status and health metrics
 - **Responsive Design**: Mobile-first responsive interface
-- **Interactive Charts**: Visual representation of job statistics
 - **Advanced Filtering**: Filter jobs by status, priority, and search
 - **Toast Notifications**: User-friendly feedback system
-- **State Management**: Zustand for efficient state management
-- **Modern Animations**: Smooth transitions and micro-interactions
 
 ## 🛠️ Tech Stack
 
@@ -41,11 +37,10 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 
 - **Runtime**: Node.js 18+
 - **Framework**: Express.js
-- **Database**: MongoDB Atlas
+- **Database**: MongoDB
 - **Scheduling**: node-cron
 - **Authentication**: JWT (configured)
 - **Validation**: Mongoose schema validation
-- **CORS**: Cross-Origin Resource Sharing enabled
 
 ### Frontend
 
@@ -56,106 +51,89 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 - **Routing**: React Router DOM
 - **HTTP Client**: Axios
 - **Notifications**: React Hot Toast
-- **Icons**: Heroicons (SVG)
 
 ## 📋 System Requirements
-
-### Local Development
 
 - **Node.js**: 18.0.0 or higher
 - **npm**: 8.0.0 or higher
 - **MongoDB**: Local installation or MongoDB Atlas account
 - **Git**: For version control
 
-### Production Deployment
+## 🚀 Quick Start
 
-- **Render Account**: For hosting both frontend and backend
-- **MongoDB Atlas**: Cloud database service
-- **Domain**: Optional custom domain
-
-## 🏗️ Project Structure
-
-```
-/backend
-  ├── /config
-  ├── /controllers
-  ├── /models
-  ├── /routes
-  ├── /utils
-  ├── server.js
-  └── .env
-/frontend
-  ├── /public
-  ├── /src
-      ├── /components
-      ├── /hooks
-      ├── /layouts
-      ├── /pages
-      ├── /services
-      ├── /store
-      ├── /styles
-      ├── App.jsx
-      ├── main.jsx
-  └── index.html
-```
-
-## Installation
-
-### Backend
-
-1. Clone the backend repository
+### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/taskcron.git
+cd taskcron
+```
+
+### 2. Backend Setup
+
+Navigate to the backend directory:
+
+```bash
 cd backend
 ```
 
-2. Install dependencies
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Set up environment variables
-   Create a `.env` file in the root directory:
+Create a `.env` file in the backend directory with the following variables:
 
 ```env
-MONGO_URI=mongodb+srv://admin:Mahesh123mongo@ecommerce-web.kv4zvrc.mongodb.net/jobSchedulerDB?retryWrites=true&w=majority&appName=ecommerce-web
-JWT_SECRET=jwsdfke5kthdrgjfdjkfdgdfgd@33344343jjddsdd
+# Database Configuration
+MONGO_URI=mongodb://localhost:27017/taskcron
+# For MongoDB Atlas, use: mongodb+srv://username:password@cluster.mongodb.net/taskcron?retryWrites=true&w=majority
+
+# JWT Secret (generate a secure random string)
+JWT_SECRET=your-super-secret-jwt-key-here-make-it-long-and-complex
+
+# Server Configuration
 PORT=5000
 ```
 
-4. Start the server
+**Important Environment Variables:**
+
+- `MONGO_URI`: Your MongoDB connection string
+  - **Local MongoDB**: `mongodb://localhost:27017/taskcron`
+  - **MongoDB Atlas**: `mongodb+srv://username:password@cluster.mongodb.net/taskcron?retryWrites=true&w=majority`
+- `JWT_SECRET`: A secure random string for JWT token signing (minimum 32 characters)
+- `PORT`: Port number for the backend server (default: 5000)
+
+Start the backend server:
 
 ```bash
 npm start
 ```
 
-The server will start on `http://localhost:5000`
+The backend server will start on `http://localhost:5000`
 
-### Frontend
+### 3. Frontend Setup
 
-1. Clone the frontend repository
+Open a new terminal and navigate to the frontend directory:
 
 ```bash
-git clone <repository-url>
 cd frontend
 ```
 
-2. Install dependencies
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-3. Set up environment variables
-   Create a `.env` file in the root directory:
+Create a `.env` file in the frontend directory:
 
 ```env
+# API Configuration
 VITE_API_URL=http://localhost:5000/api
 ```
 
-4. Start the development server
+Start the frontend development server:
 
 ```bash
 npm run dev
@@ -163,72 +141,151 @@ npm run dev
 
 The frontend will be available at `http://localhost:5173`
 
-## Worker Architecture
+## 🗄️ Database Setup
 
-The system now features a **12-worker cluster** with specialized capabilities:
+### Option 1: Local MongoDB
 
-### Worker Configuration
+1. **Install MongoDB**: Download and install MongoDB from [https://www.mongodb.com/try/download/community](https://www.mongodb.com/try/download/community)
 
-#### General Purpose Workers (2 workers)
+2. **Start MongoDB**:
 
-- **worker-1**: `server-1.cluster.local:8001` - Supports `script`, `api`, `shell`
-- **worker-2**: `server-2.cluster.local:8002` - Supports `script`, `api`, `shell`
+   ```bash
+   # On Windows
+   mongod
 
-#### Specialized Workers (6 workers)
+   # On macOS/Linux
+   sudo systemctl start mongod
+   ```
 
-- **worker-3**: `script-1.cluster.local:8003` - Script specialist
-- **worker-4**: `script-2.cluster.local:8004` - Script specialist
-- **worker-5**: `api-1.cluster.local:8005` - API specialist
-- **worker-6**: `api-2.cluster.local:8006` - API specialist
-- **worker-7**: `shell-1.cluster.local:8007` - Shell specialist
-- **worker-8**: `shell-2.cluster.local:8008` - Shell specialist
+3. **Use in .env**:
+   ```env
+   MONGO_URI=mongodb://localhost:27017/taskcron
+   ```
 
-#### Mixed Capability Workers (2 workers)
+### Option 2: MongoDB Atlas (Cloud)
 
-- **worker-9**: `mixed-1.cluster.local:8009` - Supports `script`, `api`
-- **worker-10**: `mixed-2.cluster.local:8010` - Supports `api`, `shell`
+1. **Create Account**: Sign up at [https://cloud.mongodb.com/](https://cloud.mongodb.com/)
 
-#### Test Workers (2 workers)
+2. **Create Cluster**: Create a free cluster (M0)
 
-- **worker-11**: `offline-1.cluster.local:8011` - Initially offline for testing
-- **worker-12**: `busy-1.cluster.local:8012` - Initially busy for testing
+3. **Create Database User**:
 
-### Enhanced Features
+   - Go to Database Access
+   - Add new user with read/write permissions
+   - Remember the username and password
 
-#### Advanced Health Monitoring
+4. **Configure Network Access**:
 
-- **Consecutive Failure Tracking**: Workers track consecutive job failures
-- **Health Status Levels**: healthy, warning, degraded, offline, unresponsive
-- **Conservative Offline Marking**: Busy workers won't be marked offline
-- **Faster Recovery**: 30-second recovery detection
+   - Go to Network Access
+   - Add IP Address: `0.0.0.0/0` (for development)
 
-#### Load Balancing Strategy
+5. **Get Connection String**:
 
-- **Capability-First**: Only assign jobs to capable workers
-- **Reliability-Based**: Prioritize workers with fewer consecutive failures
-- **Load Distribution**: Balance jobs across workers with similar reliability
+   - Go to Database → Connect
+   - Choose "Connect your application"
+   - Copy the connection string
 
-#### Enhanced Error Reporting
+6. **Use in .env**:
+   ```env
+   MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/taskcron?retryWrites=true&w=majority
+   ```
 
-- **Complete Worker Status**: Full worker information in error responses
-- **Cluster Health Summary**: Overview of entire cluster state
-- **Actionable Suggestions**: Specific recommendations for failed assignments
-- **Fallback Options**: Alternative workers suggested when assignments fail
+## 📁 Project Structure
 
-## API Endpoints
+```
+taskcron/
+├── backend/                     # Node.js Backend
+│   ├── src/
+│   │   ├── controllers/         # Route controllers
+│   │   ├── models/             # MongoDB models
+│   │   ├── routes/             # API routes
+│   │   ├── schedular/          # Job scheduling logic
+│   │   ├── utils/              # Utility functions
+│   │   └── config/             # Configuration files
+│   ├── app.js                  # Express app setup
+│   ├── server.js               # Server entry point
+│   ├── package.json            # Backend dependencies
+│   └── .env                    # Environment variables
+├── frontend/                    # React Frontend
+│   ├── src/
+│   │   ├── components/         # React components
+│   │   ├── pages/              # Page components
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── stores/             # Zustand stores
+│   │   ├── services/           # API services
+│   │   └── utils/              # Utility functions
+│   ├── public/                 # Static assets
+│   ├── index.html              # HTML template
+│   ├── package.json            # Frontend dependencies
+│   ├── vite.config.js          # Vite configuration
+│   └── .env                    # Environment variables
+└── README.md                   # This file
+```
 
-### Job Management
+## 🎮 Usage Guide
 
-#### 1. Create Job
+### Creating Your First Job
 
-- **POST** `/api/jobs`
-- **Description**: Create a new job with capability-based worker assignment
-- **Body**:
+1. **Access the Dashboard**: Open `http://localhost:5173` in your browser
+2. **Create New Job**: Click "Create New Job" or navigate to `/jobs/new`
+3. **Fill Job Details**:
+   - **Name**: Give your job a descriptive name
+   - **Schedule**: Use cron expression (e.g., `*/5 * * * *` for every 5 minutes)
+   - **Command**: Enter the command to execute
+   - **Priority**: Select High, Medium, or Low
+   - **Retry Policy**: Set number of retries on failure
 
-```json
+### Command Types
+
+TaskCron supports three types of commands:
+
+1. **Script Commands**: `script:/path/to/script.js`
+2. **API Commands**: `http://api.example.com/endpoint`
+3. **Shell Commands**: `echo "Hello World"`
+
+### Cron Expression Examples
+
+```
+* * * * *        # Every minute
+*/5 * * * *      # Every 5 minutes
+0 * * * *        # Every hour
+0 0 * * *        # Daily at midnight
+0 9 * * 1        # Weekly on Monday at 9 AM
+0 0 1 * *        # Monthly on the 1st at midnight
+```
+
+### Worker System
+
+TaskCron features a 12-worker cluster with specialized capabilities:
+
+| Worker Type        | Capabilities         | Count |
+| ------------------ | -------------------- | ----- |
+| General Purpose    | Script, API, Shell   | 2     |
+| Script Specialists | Script only          | 2     |
+| API Specialists    | API only             | 2     |
+| Shell Specialists  | Shell only           | 2     |
+| Mixed Capability   | Various combinations | 4     |
+
+## 📚 API Documentation
+
+### Base URL
+
+```
+Local: http://localhost:5000/api
+Production: https://careeco-assignment-r5mw.onrender.com/api
+```
+
+### Job Management Endpoints
+
+#### Create Job
+
+```http
+POST /api/jobs
+Content-Type: application/json
+
 {
-  "name": "Daily Report Generation",
-  "schedule": "0 3 * * *",
+  "name": "Daily Report",
+  "schedule": "0 9 * * *",
   "command": "script:/path/to/report.js",
   "priority": "High",
   "dependencies": [],
@@ -236,348 +293,237 @@ The system now features a **12-worker cluster** with specialized capabilities:
 }
 ```
 
-#### 2. Get All Jobs
+#### Get All Jobs
 
-- **GET** `/api/jobs`
-- **Description**: Retrieve all jobs with optional filtering
-- **Query Parameters**:
-  - `status`: Filter by status (pending, running, success, failed)
-  - `priority`: Filter by priority (High, Medium, Low)
-- **Example**: `/api/jobs?status=pending&priority=High`
+```http
+GET /api/jobs
+GET /api/jobs?status=pending&priority=High
+```
 
-#### 3. Get Job by ID
+#### Get Job by ID
 
-- **GET** `/api/jobs/:id`
-- **Description**: Retrieve a specific job by ID
+```http
+GET /api/jobs/:id
+```
 
-#### 4. Update Job
+#### Update Job
 
-- **PUT** `/api/jobs/:id`
-- **Description**: Update job configuration
-- **Body**:
+```http
+PUT /api/jobs/:id
+Content-Type: application/json
 
-```json
 {
   "schedule": "*/10 * * * *",
-  "priority": "Medium",
-  "retryPolicy": 2
+  "priority": "Medium"
 }
 ```
 
-#### 5. Delete Job
+#### Delete Job
 
-- **DELETE** `/api/jobs/:id`
-- **Description**: Delete a job (checks for dependencies)
+```http
+DELETE /api/jobs/:id
+```
 
-#### 6. Get Job Status
+#### Execute Job Manually
 
-- **GET** `/api/jobs/:id/status`
-- **Description**: Get current job status and statistics
+```http
+POST /api/jobs/:id/execute
+```
 
-#### 7. Get Job History
+### Worker Management Endpoints
 
-- **GET** `/api/jobs/:id/history`
-- **Description**: Get job execution history and statistics
+#### Get All Workers
 
-#### 8. Execute Job Manually
+```http
+GET /api/workers
+```
 
-- **POST** `/api/jobs/:id/execute`
-- **Description**: Manually trigger job execution
+#### Get Worker by ID
 
-### Worker Management
+```http
+GET /api/workers/:id
+```
 
-#### 1. Get All Workers
+#### Get Cluster Statistics
 
-- **GET** `/api/workers`
-- **Description**: Get all 12 workers with cluster statistics and capability information
+```http
+GET /api/workers/stats
+```
 
-#### 2. Get Worker Status
+#### Assign Job to Worker
 
-- **GET** `/api/workers/:id`
-- **Description**: Get specific worker status with health information
+```http
+POST /api/workers/assign
+Content-Type: application/json
 
-#### 3. Get Cluster Statistics
-
-- **GET** `/api/workers/stats`
-- **Description**: Get comprehensive cluster performance metrics
-
-#### 4. Get Workers by Capability
-
-- **GET** `/api/workers/capability/:type`
-- **Description**: Get workers that support specific capability
-- **Parameters**:
-  - `type`: Capability type (script, api, shell)
-- **Example**: `/api/workers/capability/script`
-
-#### 5. Assign Job to Worker
-
-- **POST** `/api/workers/assign`
-- **Description**: Manually assign job to worker with capability verification
-- **Body**:
-
-```json
 {
   "workerId": "worker-1",
-  "jobId": "60d5ec49f1b2c8a5e8b9f123"
+  "jobId": "job-id-here"
 }
 ```
 
-#### 6. Release Worker
+## 🧪 Testing
 
-- **POST** `/api/workers/:id/release`
-- **Description**: Release worker from current job
-- **Body**:
+### Backend Testing
 
-```json
-{
-  "jobSuccess": true
-}
+```bash
+cd backend
+npm test
 ```
 
-## Command Type Detection & Worker Compatibility
+### Frontend Testing
 
-### Command Types
+```bash
+cd frontend
+npm test
+```
 
-- **script**: Commands starting with `script:` (e.g., `script:/path/to/script.js`)
-- **api**: Commands starting with `http://` or `https://` (e.g., `http://api.example.com/test`)
-- **shell**: All other commands (e.g., `ls -la`, `echo "Hello"`)
+### Manual Testing with Postman
 
-### Worker Capability Matrix
-
-| Worker    | Script | API | Shell | Host                    |
-| --------- | ------ | --- | ----- | ----------------------- |
-| worker-1  | ✅     | ✅  | ✅    | server-1.cluster.local  |
-| worker-2  | ✅     | ✅  | ✅    | server-2.cluster.local  |
-| worker-3  | ✅     | ❌  | ❌    | script-1.cluster.local  |
-| worker-4  | ✅     | ❌  | ❌    | script-2.cluster.local  |
-| worker-5  | ❌     | ✅  | ❌    | api-1.cluster.local     |
-| worker-6  | ❌     | ✅  | ❌    | api-2.cluster.local     |
-| worker-7  | ❌     | ❌  | ✅    | shell-1.cluster.local   |
-| worker-8  | ❌     | ❌  | ✅    | shell-2.cluster.local   |
-| worker-9  | ✅     | ✅  | ❌    | mixed-1.cluster.local   |
-| worker-10 | ❌     | ✅  | ✅    | mixed-2.cluster.local   |
-| worker-11 | ✅     | ✅  | ✅    | offline-1.cluster.local |
-| worker-12 | ✅     | ❌  | ✅    | busy-1.cluster.local    |
-
-## Postman Testing Guide
-
-### Environment Setup
-
-1. Create a new environment in Postman
-2. Add variables:
+1. **Import Collection**: Import the provided Postman collection
+2. **Set Environment Variables**:
    - `baseUrl`: `http://localhost:5000`
-   - `jobId`: (will be set after creating a job)
-   - `workerId`: `worker-1`
+   - `frontendUrl`: `http://localhost:5173`
+3. **Test Endpoints**: Run the provided test scenarios
 
-### Testing Enhanced Worker System
+## 🚀 Deployment
 
-#### 1. Test Worker Capabilities Distribution
+### Backend Deployment (Render)
 
-**Get Script Workers (6 workers expected):**
+1. **Create Web Service** on Render
+2. **Configure Settings**:
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+3. **Add Environment Variables**:
+   ```
+   MONGO_URI=your-mongodb-atlas-connection-string
+   JWT_SECRET=your-production-jwt-secret
+   PORT=5000
+   ```
 
-```
-GET {{baseUrl}}/api/workers/capability/script
-```
+### Frontend Deployment (Render)
 
-**Get API Workers (7 workers expected):**
+1. **Create Static Site** on Render
+2. **Configure Settings**:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist`
+3. **Add Environment Variables**:
+   ```
+   VITE_API_URL=https://your-backend-url.onrender.com/api
+   ```
 
-```
-GET {{baseUrl}}/api/workers/capability/api
-```
+## 🔧 Configuration
 
-**Get Shell Workers (6 workers expected):**
+### Backend Configuration
 
-```
-GET {{baseUrl}}/api/workers/capability/shell
-```
+Edit `backend/.env`:
 
-#### 2. Test Load Balancing
+```env
+# Database
+MONGO_URI=mongodb://localhost:27017/taskcron
 
-**Create Multiple Script Jobs:**
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-minimum-32-characters
 
-```
-POST {{baseUrl}}/api/jobs
-Content-Type: application/json
+# Server
+PORT=5000
 
-{
-  "name": "Script Job {{$randomInt}}",
-  "schedule": "*/5 * * * *",
-  "command": "script:/path/to/script{{$randomInt}}.js",
-  "priority": "High",
-  "dependencies": [],
-  "retryPolicy": 2
-}
-```
-
-#### 3. Test Capability Mismatch Handling
-
-**Try to assign shell job to script-only worker:**
-
-```
-POST {{baseUrl}}/api/workers/assign
-Content-Type: application/json
-
-{
-  "workerId": "worker-3",
-  "jobId": "{{shellJobId}}"
-}
+# Optional: Logging level
+LOG_LEVEL=info
 ```
 
-#### 4. Test Worker Health Monitoring
+### Frontend Configuration
 
-**Check specific worker health:**
+Edit `frontend/.env`:
 
-```
-GET {{baseUrl}}/api/workers/worker-11
-```
+```env
+# API Configuration
+VITE_API_URL=http://localhost:5000/api
 
-**Monitor cluster health:**
-
-```
-GET {{baseUrl}}/api/workers/stats
-```
-
-### Enhanced Error Responses
-
-**Capability Mismatch Response:**
-
-```json
-{
-  "error": "Worker worker-3 doesn't support 'shell' commands",
-  "compatibleWorkers": [
-    "worker-1",
-    "worker-2",
-    "worker-7",
-    "worker-8",
-    "worker-10",
-    "worker-11",
-    "worker-12"
-  ],
-  "availableCompatibleWorkers": ["worker-1", "worker-7", "worker-8"],
-  "clusterStatus": {
-    "totalWorkers": 12,
-    "activeWorkers": 11,
-    "idleWorkers": 8,
-    "busyWorkers": 2,
-    "offlineWorkers": 1
-  },
-  "suggestions": "Try assigning to: worker-1, worker-7, worker-8"
-}
+# Optional: Application settings
+VITE_APP_NAME=TaskCron
+VITE_APP_VERSION=1.0.0
 ```
 
-**Enhanced Worker Status Response:**
+## 🐛 Troubleshooting
 
-```json
-{
-  "id": "worker-1",
-  "status": "idle",
-  "capabilities": ["script", "api", "shell"],
-  "uptime": "2h 45m",
-  "loadPercentage": 25,
-  "healthStatus": {
-    "status": "healthy",
-    "message": "Operating normally",
-    "consecutiveFailures": 0,
-    "lastPing": "2024-01-15T10:30:00.000Z"
-  }
-}
+### Common Issues
+
+#### Backend won't start
+
+- **Check MongoDB**: Ensure MongoDB is running and accessible
+- **Check Port**: Make sure port 5000 is not in use
+- **Check Environment**: Verify all environment variables are set correctly
+
+#### Frontend won't start
+
+- **Check Node Version**: Ensure Node.js 18+ is installed
+- **Check API URL**: Verify `VITE_API_URL` points to running backend
+- **Clear Cache**: Delete `node_modules` and run `npm install`
+
+#### Database Connection Issues
+
+- **Local MongoDB**: Ensure MongoDB service is running
+- **MongoDB Atlas**: Check network access and credentials
+- **Connection String**: Verify the format and credentials
+
+#### CORS Issues
+
+- **Frontend URL**: Ensure backend CORS allows frontend URL
+- **Local Development**: Check `app.js` CORS configuration
+
+### Debug Commands
+
+```bash
+# Check Node version
+node --version
+
+# Check npm version
+npm --version
+
+# Check MongoDB connection
+mongosh "your-connection-string"
+
+# Check if port is in use
+netstat -an | grep :5000
+
+# View application logs
+npm run dev  # Frontend
+npm start    # Backend
 ```
 
-## System Requirements Verification
+## 🤝 Contributing
 
-### 1. ✅ Store Job Definitions Persistently
+1. **Fork the Repository**
+2. **Create Feature Branch**: `git checkout -b feature/amazing-feature`
+3. **Commit Changes**: `git commit -m 'Add amazing feature'`
+4. **Push to Branch**: `git push origin feature/amazing-feature`
+5. **Open Pull Request**
 
-- **Implementation**: MongoDB with comprehensive job schema
-- **Features**: Full CRUD operations, job history, execution tracking
-- **Storage**: Persistent job definitions with relationships and metadata
+### Development Guidelines
 
-### 2. ✅ Trigger Jobs at Scheduled Times
+- Follow existing code style and conventions
+- Add tests for new features
+- Update documentation for API changes
+- Ensure all tests pass before submitting PR
 
-- **Implementation**: Cron-based scheduler with minute-level precision
-- **Features**: Multiple cron expressions, timezone support, manual triggering
-- **Reliability**: Automatic job pickup and execution
+## 📝 License
 
-### 3. ✅ Manage Job Execution Across Cluster
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- **Implementation**: 12-worker cluster with capability-based assignment
-- **Features**: Load balancing, health monitoring, automatic failover
-- **Scalability**: Easily configurable worker pool
+## 🙏 Acknowledgments
 
-### 4. ✅ Handle Job Failures and Retry Logic
+- **Node.js Community** for excellent runtime environment
+- **React Team** for powerful frontend framework
+- **MongoDB** for reliable database solution
+- **Render** for seamless deployment platform
 
-- **Implementation**: Configurable retry policies with exponential backoff
-- **Features**: Consecutive failure tracking, retry limits, failure analytics
-- **Reliability**: Automatic retry with intelligent backoff
+## 📞 Support
 
-### 5. ✅ Support Job Dependencies
+For support, please create an issue in the GitHub repository or contact the development team.
 
-- **Implementation**: Full dependency graph support with validation
-- **Features**: Dependency checking, circular dependency prevention
-- **Reliability**: Automatic dependency resolution
+---
 
-### 6. ✅ Provide API for Job Management
-
-- **Implementation**: Complete RESTful API with comprehensive endpoints
-- **Features**: CRUD operations, status monitoring, manual execution
-- **Usability**: Clear error messages and response formats
-
-## Monitoring & Analytics
-
-### Enhanced Cluster Statistics
-
-- **Total Workers**: 12 (configurable)
-- **Worker Distribution**: General purpose, specialized, and mixed workers
-- **Capability Coverage**: Redundancy across all job types
-- **Health Metrics**: Real-time health monitoring with degradation detection
-
-### Job Execution Analytics
-
-- **Success Rates**: Per-job and cluster-wide success tracking
-- **Execution History**: Detailed logs with timing and output
-- **Performance Metrics**: Job duration, failure patterns, retry statistics
-- **Dependency Analytics**: Dependency resolution times and bottlenecks
-
-## Development
-
-### Enhanced Architecture Benefits
-
-1. **Scalability**: Easy to add more workers with specific capabilities
-2. **Reliability**: Multiple workers per capability type ensure redundancy
-3. **Performance**: Specialized workers optimized for specific job types
-4. **Monitoring**: Comprehensive health and performance tracking
-5. **Maintenance**: Individual worker management without cluster downtime
-
-### Adding New Workers
-
-To add more workers, update the `workers` array in `workerController.js`:
-
-```javascript
-{
-  id: "worker-13",
-  status: "idle",
-  capabilities: ["script", "api"],
-  host: "new-worker.cluster.local",
-  port: 8013,
-  // ... other properties
-}
-```
-
-## Troubleshooting
-
-### Common Issues with 12-Worker Setup
-
-1. **Worker Overload**: Monitor individual worker loads and redistribute
-2. **Capability Gaps**: Ensure sufficient workers for each job type
-3. **Health Issues**: Check worker health status and consecutive failures
-4. **Network Issues**: Verify worker connectivity and ping status
-
-### Performance Optimization
-
-- **Load Balancing**: Monitor worker distribution and adjust assignment logic
-- **Capacity Planning**: Scale workers based on job volume and types
-- **Health Monitoring**: Set up alerts for worker health degradation
-- **Dependency Optimization**: Minimize dependency chains for better performance
-
-## License
-
-This project is licensed under the MIT License.
+**Happy Scheduling with TaskCron! 🚀**
