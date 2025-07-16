@@ -2,11 +2,6 @@
 
 A comprehensive distributed job scheduling system built with Node.js, Express, MongoDB backend and React.js frontend. This system can schedule and execute jobs with cron-like scheduling, dependency management, priority handling, and retry policies across a cluster of worker machines.
 
-## 🚀 Live Demo
-
-- **Frontend**: [https://taskcron-frontend.onrender.com](https://taskcron-frontend.onrender.com)
-- **Backend API**: [https://careeco-assignment-r5mw.onrender.com](https://careeco-assignment-r5mw.onrender.com)
-
 ## 🎯 Features
 
 ### Backend Features
@@ -493,37 +488,3 @@ netstat -an | grep :5000
 npm run dev  # Frontend
 npm start    # Backend
 ```
-
-## 🤝 Contributing
-
-1. **Fork the Repository**
-2. **Create Feature Branch**: `git checkout -b feature/amazing-feature`
-3. **Commit Changes**: `git commit -m 'Add amazing feature'`
-4. **Push to Branch**: `git push origin feature/amazing-feature`
-5. **Open Pull Request**
-
-### Development Guidelines
-
-- Follow existing code style and conventions
-- Add tests for new features
-- Update documentation for API changes
-- Ensure all tests pass before submitting PR
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Node.js Community** for excellent runtime environment
-- **React Team** for powerful frontend framework
-- **MongoDB** for reliable database solution
-- **Render** for seamless deployment platform
-
-## 📞 Support
-
-For support, please create an issue in the GitHub repository or contact the development team.
-
----
-
-**Happy Scheduling with TaskCron! 🚀**
