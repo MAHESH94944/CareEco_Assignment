@@ -1,39 +1,16 @@
-import { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useJobOperations } from "../../hooks/useJobs";
 import { toast } from "react-hot-toast";
 import StatusBadge from "../shared/StatusBadge";
 
-const JobCard = ({ job, index = 0 }) => {
+const JobCard = React.memo(({ job, index = 0 }) => {
   const { handleExecuteJob, handleDeleteJob } = useJobOperations();
   const [isExecuting, setIsExecuting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const onExecute = async () => {
-    setIsExecuting(true);
-    const result = await handleExecuteJob(job._id);
-    if (result.success) {
-      toast.success("Job queued for execution");
-    } else {
-      toast.error(result.error);
-    }
-    setIsExecuting(false);
-  };
-
-  const onDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this job?")) {
-      setIsDeleting(true);
-      const result = await handleDeleteJob(job._id);
-      if (result.success) {
-        toast.success("Job deleted successfully");
-      } else {
-        toast.error(result.error);
-      }
-      setIsDeleting(false);
-    }
-  };
-
-  const getJobTypeConfig = (command) => {
-    if (command.startsWith("script:")) {
+  // Memoize job type configuration
+  const jobTypeConfig = useMemo(() => {
+    if (job.command.startsWith("script:")) {
       return {
         type: "script",
         bgColor: "bg-purple-100",
@@ -41,7 +18,7 @@ const JobCard = ({ job, index = 0 }) => {
         borderColor: "border-purple-200",
       };
     }
-    if (command.startsWith("http")) {
+    if (job.command.startsWith("http")) {
       return {
         type: "api",
         bgColor: "bg-blue-100",
@@ -55,10 +32,11 @@ const JobCard = ({ job, index = 0 }) => {
       textColor: "text-green-800",
       borderColor: "border-green-200",
     };
-  };
+  }, [job.command]);
 
-  const getPriorityConfig = (priority) => {
-    switch (priority) {
+  // Memoize priority configuration
+  const priorityConfig = useMemo(() => {
+    switch (job.priority) {
       case "High":
         return {
           bgColor: "bg-red-100",
@@ -84,10 +62,39 @@ const JobCard = ({ job, index = 0 }) => {
           borderColor: "border-gray-200",
         };
     }
-  };
+  }, [job.priority]);
 
-  const jobTypeConfig = getJobTypeConfig(job.command);
-  const priorityConfig = getPriorityConfig(job.priority);
+  // Memoize success rate calculation
+  const successRate = useMemo(() => {
+    return job.totalRuns > 0
+      ? ((job.successfulRuns || 0) / job.totalRuns) * 100
+      : 0;
+  }, [job.totalRuns, job.successfulRuns]);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const onExecute = useCallback(async () => {
+    setIsExecuting(true);
+    const result = await handleExecuteJob(job._id);
+    if (result.success) {
+      toast.success("Job queued for execution");
+    } else {
+      toast.error(result.error);
+    }
+    setIsExecuting(false);
+  }, [handleExecuteJob, job._id]);
+
+  const onDelete = useCallback(async () => {
+    if (window.confirm("Are you sure you want to delete this job?")) {
+      setIsDeleting(true);
+      const result = await handleDeleteJob(job._id);
+      if (result.success) {
+        toast.success("Job deleted successfully");
+      } else {
+        toast.error(result.error);
+      }
+      setIsDeleting(false);
+    }
+  }, [handleDeleteJob, job._id]);
 
   return (
     <div
@@ -177,13 +184,7 @@ const JobCard = ({ job, index = 0 }) => {
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-green-500 h-2 rounded-full transition-all duration-300"
-            style={{
-              width: `${
-                job.totalRuns > 0
-                  ? ((job.successfulRuns || 0) / job.totalRuns) * 100
-                  : 0
-              }%`,
-            }}
+            style={{ width: `${successRate}%` }}
           ></div>
         </div>
       </div>
@@ -325,6 +326,8 @@ const JobCard = ({ job, index = 0 }) => {
       </div>
     </div>
   );
-};
+});
+
+JobCard.displayName = "JobCard";
 
 export default JobCard;

@@ -2,7 +2,12 @@
 
 A comprehensive distributed job scheduling system built with Node.js, Express, MongoDB backend and React.js frontend. This system can schedule and execute jobs with cron-like scheduling, dependency management, priority handling, and retry policies across a cluster of worker machines.
 
-## 🚀 Features
+## 🚀 Live Demo
+
+- **Frontend**: [https://job-scheduler-frontend.onrender.com](https://job-scheduler-frontend.onrender.com)
+- **Backend API**: [https://job-scheduler-backend.onrender.com](https://job-scheduler-backend.onrender.com)
+
+## 🎯 Features
 
 ### Backend Features
 
@@ -30,26 +35,17 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 - **State Management**: Zustand for efficient state management
 - **Modern Animations**: Smooth transitions and micro-interactions
 
-## 📋 System Requirements Compliance
-
-✅ **Store job definitions persistently**: MongoDB with complete job schema
-✅ **Trigger jobs at scheduled times**: Cron-based scheduler with minute-level precision
-✅ **Manage job execution across cluster**: 12-worker cluster with capability-based assignment
-✅ **Handle job failures and retry logic**: Configurable retry policies with exponential backoff
-✅ **Support job dependencies**: Full dependency graph support with validation
-✅ **Provide comprehensive API**: Complete CRUD operations with enhanced monitoring
-✅ **Modern Web Interface**: React-based dashboard with real-time updates
-
 ## 🛠️ Tech Stack
 
 ### Backend
 
-- **Runtime**: Node.js
+- **Runtime**: Node.js 18+
 - **Framework**: Express.js
-- **Database**: MongoDB
+- **Database**: MongoDB Atlas
 - **Scheduling**: node-cron
 - **Authentication**: JWT (configured)
 - **Validation**: Mongoose schema validation
+- **CORS**: Cross-Origin Resource Sharing enabled
 
 ### Frontend
 
@@ -62,7 +58,22 @@ A comprehensive distributed job scheduling system built with Node.js, Express, M
 - **Notifications**: React Hot Toast
 - **Icons**: Heroicons (SVG)
 
-## 📁 Project Structure
+## 📋 System Requirements
+
+### Local Development
+
+- **Node.js**: 18.0.0 or higher
+- **npm**: 8.0.0 or higher
+- **MongoDB**: Local installation or MongoDB Atlas account
+- **Git**: For version control
+
+### Production Deployment
+
+- **Render Account**: For hosting both frontend and backend
+- **MongoDB Atlas**: Cloud database service
+- **Domain**: Optional custom domain
+
+## 🏗️ Project Structure
 
 ```
 /backend

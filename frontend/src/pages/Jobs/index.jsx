@@ -1,24 +1,57 @@
-import { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useJobs } from "../../hooks/useJobs";
 import JobCard from "../../components/jobs/JobCard";
+import LoadingSpinner from "../../components/shared/LoadingSpinner";
 
-const Jobs = () => {
+const Jobs = React.memo(() => {
   const { filteredJobs, loading, filters, actions } = useJobs();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleFilterChange = (key, value) => {
-    actions.setFilters({ ...filters, [key]: value });
-  };
+  // Memoize filter change handler
+  const handleFilterChange = useCallback(
+    (key, value) => {
+      actions.setFilters({ ...filters, [key]: value });
+    },
+    [actions, filters]
+  );
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    actions.setFilters({ ...filters, search: value });
-  };
+  // Memoize search handler
+  const handleSearch = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setSearchTerm(value);
+      actions.setFilters({ ...filters, search: value });
+    },
+    [actions, filters]
+  );
+
+  // Memoize clear filters handler
+  const handleClearFilters = useCallback(() => {
+    setSearchTerm("");
+    actions.setFilters({ status: "", priority: "", search: "" });
+  }, [actions]);
+
+  // Memoize filtered jobs count
+  const filteredJobsCount = useMemo(() => {
+    return filteredJobs?.length || 0;
+  }, [filteredJobs]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="space-y-6">
+      <Helmet>
+        <title>Jobs - Job Scheduler</title>
+        <meta
+          name="description"
+          content="Manage and monitor your scheduled jobs with filtering and search capabilities."
+        />
+      </Helmet>
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Jobs</h1>
         <Link
@@ -102,9 +135,7 @@ const Jobs = () => {
           </div>
           <div className="flex items-end">
             <button
-              onClick={() =>
-                actions.setFilters({ status: "", priority: "", search: "" })
-              }
+              onClick={handleClearFilters}
               className="w-full bg-gray-200 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               Clear Filters
@@ -117,12 +148,10 @@ const Jobs = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            All Jobs ({filteredJobs.length})
+            All Jobs ({filteredJobsCount})
           </h3>
 
-          {loading ? (
-            <div className="text-center py-8">Loading jobs...</div>
-          ) : filteredJobs.length === 0 ? (
+          {filteredJobsCount === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No jobs found matching your criteria
             </div>
@@ -137,6 +166,8 @@ const Jobs = () => {
       </div>
     </div>
   );
-};
+});
+
+Jobs.displayName = "Jobs";
 
 export default Jobs;

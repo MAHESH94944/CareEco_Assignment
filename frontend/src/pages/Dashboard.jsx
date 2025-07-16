@@ -1,18 +1,77 @@
+import React, { useMemo, useCallback } from "react";
 import { useJobs } from "../hooks/useJobs";
 import { useWorkers } from "../hooks/useWorkers";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import JobCard from "../components/jobs/JobCard";
-import WorkerGrid from "../components/workers/WorkerGrid";
+import LoadingSpinner from "../components/shared/LoadingSpinner";
 
-const Dashboard = () => {
+const Dashboard = React.memo(() => {
   const { jobs, jobStats, loading: jobsLoading } = useJobs();
   const { workers, clusterStats, loading: workersLoading } = useWorkers();
   const navigate = useNavigate();
 
-  const recentJobs = jobs.slice(0, 4);
+  // Memoize recent jobs to prevent unnecessary recalculations
+  const recentJobs = useMemo(() => {
+    if (!jobs || !Array.isArray(jobs)) return [];
+    return jobs.slice(0, 4);
+  }, [jobs]);
+
+  // Memoize navigation handlers
+  const navigateToNewJob = useCallback(() => navigate("/jobs/new"), [navigate]);
+  const navigateToWorkers = useCallback(() => navigate("/workers"), [navigate]);
+  const navigateToJobs = useCallback(() => navigate("/jobs"), [navigate]);
+
+  // Memoize stats cards data
+  const statsCards = useMemo(() => {
+    if (!jobStats || !clusterStats) return [];
+
+    return [
+      {
+        title: "Total Jobs",
+        value: jobStats.total || 0,
+        icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
+        color: "blue",
+        subtitle: `+${jobStats.success || 0} completed`,
+      },
+      {
+        title: "Running Jobs",
+        value: jobStats.running || 0,
+        icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8M5 12a7 7 0 1114 0v3.5a6.5 6.5 0 11-13 0V12z",
+        color: "green",
+        subtitle: "Currently executing",
+      },
+      {
+        title: "Failed Jobs",
+        value: jobStats.failed || 0,
+        icon: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+        color: "red",
+        subtitle: `${jobStats.pending || 0} pending retry`,
+      },
+      {
+        title: "Active Workers",
+        value: workers?.length || 0,
+        icon: "M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01",
+        color: "purple",
+        subtitle: `${clusterStats?.busyWorkers || 0} currently busy`,
+      },
+    ];
+  }, [jobStats, workers, clusterStats]);
+
+  if (jobsLoading || workersLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>Dashboard - Job Scheduler</title>
+        <meta
+          name="description"
+          content="Monitor your distributed job scheduler performance with real-time statistics and worker status."
+        />
+      </Helmet>
+
       {/* Header Section */}
       <div className="bg-white border-b border-gray-200 mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -24,21 +83,9 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <div
-                className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
-                  jobsLoading || workersLoading
-                    ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                    : "bg-green-100 text-green-800 border border-green-200"
-                }`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full mr-2 ${
-                    jobsLoading || workersLoading
-                      ? "bg-yellow-500 animate-pulse"
-                      : "bg-green-500"
-                  }`}
-                ></div>
-                {jobsLoading || workersLoading ? "Loading..." : "Live Data"}
+              <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+                <div className="w-2 h-2 rounded-full mr-2 bg-green-500"></div>
+                Live Data
               </div>
             </div>
           </div>
@@ -48,139 +95,43 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Jobs Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {jobStats.total}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          {statsCards.map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    {stat.title}
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {stat.value}
+                  </p>
+                </div>
+                <div
+                  className={`w-12 h-12 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
+                  <svg
+                    className={`w-6 h-6 text-${stat.color}-600`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={stat.icon}
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center">
+                <span className="text-sm text-gray-500">{stat.subtitle}</span>
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              <span className="text-green-600 text-sm font-medium">
-                +{jobStats.success}
-              </span>
-              <span className="text-gray-500 text-sm ml-2">completed</span>
-            </div>
-          </div>
-
-          {/* Running Jobs Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Running Jobs
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {jobStats.running}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8M5 12a7 7 0 1114 0v3.5a6.5 6.5 0 11-13 0V12z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-gray-500 text-sm">Currently executing</span>
-            </div>
-          </div>
-
-          {/* Failed Jobs Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Failed Jobs</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {jobStats.failed}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <span className="text-red-600 text-sm font-medium">
-                {jobStats.pending}
-              </span>
-              <span className="text-gray-500 text-sm ml-2">pending retry</span>
-            </div>
-          </div>
-
-          {/* Active Workers Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Active Workers
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {workers.length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <span className="text-purple-600 text-sm font-medium">
-                {clusterStats?.busyWorkers || 0}
-              </span>
-              <span className="text-gray-500 text-sm ml-2">currently busy</span>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Main Content Grid */}
@@ -193,21 +144,16 @@ const Dashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-900">
                     Recent Jobs
                   </h3>
-                  <button className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                  <button
+                    onClick={navigateToJobs}
+                    className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                  >
                     View all
                   </button>
                 </div>
               </div>
               <div className="p-6">
-                {jobsLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="bg-gray-200 h-24 rounded-lg"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : recentJobs.length === 0 ? (
+                {recentJobs.length === 0 ? (
                   <div className="text-center py-12">
                     <svg
                       className="w-12 h-12 text-gray-400 mx-auto mb-4"
@@ -405,19 +351,19 @@ const Dashboard = () => {
               </div>
               <div className="p-6 space-y-3">
                 <button
-                  onClick={() => navigate("/jobs/new")}
+                  onClick={navigateToNewJob}
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                 >
                   Create New Job
                 </button>
                 <button
-                  onClick={() => navigate("/workers")}
+                  onClick={navigateToWorkers}
                   className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium"
                 >
                   View All Workers
                 </button>
                 <button
-                  onClick={() => navigate("/jobs")}
+                  onClick={navigateToJobs}
                   className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium"
                 >
                   View All Jobs
@@ -429,6 +375,8 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
+});
+
+Dashboard.displayName = "Dashboard";
 
 export default Dashboard;

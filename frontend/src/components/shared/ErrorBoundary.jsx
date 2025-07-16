@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -17,11 +18,14 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-3 mb-4">
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+          <Helmet>
+            <title>Error - Job Scheduler</title>
+          </Helmet>
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
+            <div className="text-center">
               <svg
-                className="w-8 h-8 text-red-500"
+                className="w-16 h-16 text-red-500 mx-auto mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -33,20 +37,19 @@ class ErrorBoundary extends React.Component {
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Something went wrong
               </h2>
+              <p className="text-gray-600 mb-4">
+                We're sorry, but something unexpected happened.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Reload Page
+              </button>
             </div>
-            <p className="text-gray-600 mb-4">
-              An error occurred while loading the application. Please try
-              refreshing the page.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              Refresh Page
-            </button>
           </div>
         </div>
       );

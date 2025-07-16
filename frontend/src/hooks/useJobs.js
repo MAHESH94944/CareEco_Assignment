@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import useJobStore from "../stores/jobStore";
 
 export const useJobs = () => {
@@ -20,12 +20,42 @@ export const useJobs = () => {
     getJobStats,
   } = useJobStore();
 
-  useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+  // Memoize filtered jobs to avoid unnecessary recalculations
+  const filteredJobs = useMemo(() => getFilteredJobs(), [jobs, filters]);
 
-  const filteredJobs = getFilteredJobs();
-  const jobStats = getJobStats();
+  // Memoize job statistics
+  const jobStats = useMemo(() => getJobStats(), [jobs]);
+
+  // Memoized fetch function to prevent unnecessary re-renders
+  const memoizedFetchJobs = useCallback(fetchJobs, [fetchJobs]);
+
+  useEffect(() => {
+    memoizedFetchJobs();
+  }, [memoizedFetchJobs]);
+
+  // Memoize actions object to prevent unnecessary re-renders
+  const actions = useMemo(
+    () => ({
+      fetchJobs: memoizedFetchJobs,
+      createJob,
+      updateJob,
+      deleteJob,
+      executeJob,
+      setSelectedJob,
+      clearError,
+      setFilters,
+    }),
+    [
+      memoizedFetchJobs,
+      createJob,
+      updateJob,
+      deleteJob,
+      executeJob,
+      setSelectedJob,
+      clearError,
+      setFilters,
+    ]
+  );
 
   return {
     jobs,
@@ -35,58 +65,61 @@ export const useJobs = () => {
     error,
     selectedJob,
     filters,
-    actions: {
-      fetchJobs,
-      createJob,
-      updateJob,
-      deleteJob,
-      executeJob,
-      setSelectedJob,
-      clearError,
-      setFilters,
-    },
+    actions,
   };
 };
 
 export const useJobOperations = () => {
-  const { createJob, updateJob, deleteJob, executeJob, setError } =
-    useJobStore();
+  const { createJob, updateJob, deleteJob, executeJob } = useJobStore();
 
-  const handleCreateJob = async (jobData) => {
-    try {
-      await createJob(jobData);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+  // Memoize operation handlers
+  const handleCreateJob = useCallback(
+    async (jobData) => {
+      try {
+        await createJob(jobData);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    [createJob]
+  );
 
-  const handleUpdateJob = async (jobId, updates) => {
-    try {
-      await updateJob(jobId, updates);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+  const handleUpdateJob = useCallback(
+    async (jobId, updates) => {
+      try {
+        await updateJob(jobId, updates);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    [updateJob]
+  );
 
-  const handleDeleteJob = async (jobId) => {
-    try {
-      await deleteJob(jobId);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+  const handleDeleteJob = useCallback(
+    async (jobId) => {
+      try {
+        await deleteJob(jobId);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    [deleteJob]
+  );
 
-  const handleExecuteJob = async (jobId) => {
-    try {
-      await executeJob(jobId);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+  const handleExecuteJob = useCallback(
+    async (jobId) => {
+      try {
+        await executeJob(jobId);
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    [executeJob]
+  );
 
   return {
     handleCreateJob,

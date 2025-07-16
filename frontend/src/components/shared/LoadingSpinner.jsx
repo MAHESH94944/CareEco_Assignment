@@ -1,30 +1,19 @@
-const LoadingSpinner = ({ size = "md", text = "Loading..." }) => {
-  const sizeClasses = {
-    sm: "w-4 h-4",
-    md: "w-8 h-8",
-    lg: "w-12 h-12",
-  };
+import React from "react";
 
+const LoadingSpinner = React.memo(() => {
   return (
-    <div className="flex items-center justify-center p-8">
-      <div className="flex items-center space-x-3">
-        <svg
-          className={`animate-spin ${sizeClasses[size]} text-blue-600`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-        <span className="text-gray-600">{text}</span>
+    <div className="flex justify-center items-center h-64">
+      <div className="relative">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="w-6 h-6 bg-blue-600 rounded-full animate-pulse"></div>
+        </div>
       </div>
+      <span className="ml-3 text-gray-600">Loading...</span>
     </div>
   );
-};
+});
+
+LoadingSpinner.displayName = "LoadingSpinner";
 
 export default LoadingSpinner;
