@@ -1,8 +1,10 @@
-# Distributed Job Scheduler
+# Distributed Job Scheduler - Full Stack Application
 
-A comprehensive distributed job scheduling system built with Node.js, Express, and MongoDB. This system can schedule and execute jobs with cron-like scheduling, dependency management, priority handling, and retry policies across a cluster of worker machines.
+A comprehensive distributed job scheduling system built with Node.js, Express, MongoDB backend and React.js frontend. This system can schedule and execute jobs with cron-like scheduling, dependency management, priority handling, and retry policies across a cluster of worker machines.
 
-## Features
+## 🚀 Features
+
+### Backend Features
 
 - **Cron-like Scheduling**: Schedule jobs with cron expressions
 - **Job Dependencies**: Define job execution order through dependencies
@@ -15,7 +17,20 @@ A comprehensive distributed job scheduling system built with Node.js, Express, a
 - **Real-time Monitoring**: Track job status and worker health
 - **Health Monitoring**: Advanced worker health tracking with consecutive failure detection
 
-## System Requirements Compliance
+### Frontend Features
+
+- **Modern React UI**: Built with React 18, Vite, and Tailwind CSS
+- **Real-time Dashboard**: Live monitoring of jobs and workers
+- **Job Management**: Create, edit, delete, and execute jobs
+- **Worker Monitoring**: View worker status and health metrics
+- **Responsive Design**: Mobile-first responsive interface
+- **Interactive Charts**: Visual representation of job statistics
+- **Advanced Filtering**: Filter jobs by status, priority, and search
+- **Toast Notifications**: User-friendly feedback system
+- **State Management**: Zustand for efficient state management
+- **Modern Animations**: Smooth transitions and micro-interactions
+
+## 📋 System Requirements Compliance
 
 ✅ **Store job definitions persistently**: MongoDB with complete job schema
 ✅ **Trigger jobs at scheduled times**: Cron-based scheduler with minute-level precision
@@ -23,17 +38,61 @@ A comprehensive distributed job scheduling system built with Node.js, Express, a
 ✅ **Handle job failures and retry logic**: Configurable retry policies with exponential backoff
 ✅ **Support job dependencies**: Full dependency graph support with validation
 ✅ **Provide comprehensive API**: Complete CRUD operations with enhanced monitoring
+✅ **Modern Web Interface**: React-based dashboard with real-time updates
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Backend**: Node.js, Express.js
+### Backend
+
+- **Runtime**: Node.js
+- **Framework**: Express.js
 - **Database**: MongoDB
 - **Scheduling**: node-cron
-- **Authentication**: JWT (configured but not implemented in routes)
+- **Authentication**: JWT (configured)
+- **Validation**: Mongoose schema validation
+
+### Frontend
+
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Routing**: React Router DOM
+- **HTTP Client**: Axios
+- **Notifications**: React Hot Toast
+- **Icons**: Heroicons (SVG)
+
+## 📁 Project Structure
+
+```
+/backend
+  ├── /config
+  ├── /controllers
+  ├── /models
+  ├── /routes
+  ├── /utils
+  ├── server.js
+  └── .env
+/frontend
+  ├── /public
+  ├── /src
+      ├── /components
+      ├── /hooks
+      ├── /layouts
+      ├── /pages
+      ├── /services
+      ├── /store
+      ├── /styles
+      ├── App.jsx
+      ├── main.jsx
+  └── index.html
+```
 
 ## Installation
 
-1. Clone the repository
+### Backend
+
+1. Clone the backend repository
 
 ```bash
 git clone <repository-url>
@@ -62,6 +121,36 @@ npm start
 ```
 
 The server will start on `http://localhost:5000`
+
+### Frontend
+
+1. Clone the frontend repository
+
+```bash
+git clone <repository-url>
+cd frontend
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Set up environment variables
+   Create a `.env` file in the root directory:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+4. Start the development server
+
+```bash
+npm run dev
+```
+
+The frontend will be available at `http://localhost:5173`
 
 ## Worker Architecture
 

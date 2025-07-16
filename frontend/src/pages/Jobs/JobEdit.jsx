@@ -1,34 +1,56 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useJobs } from "../../hooks/useJobs";
+import { useParams, useNavigate } from "react-router-dom";
+import { jobsApi } from "../../services/api";
 import { toast } from "react-hot-toast";
 import CronHelper from "../../components/shared/CronHelper";
 
-const NewJob = () => {
+const JobEdit = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { actions, jobs } = useJobs();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     schedule: "",
     command: "",
     priority: "Medium",
-    dependencies: [],
     retryPolicy: 0,
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    fetchJob();
+  }, [id]);
 
+  const fetchJob = async () => {
     try {
-      await actions.createJob(formData);
-      toast.success("Job created successfully!");
-      navigate("/jobs");
+      const job = await jobsApi.getJobById(id);
+      setFormData({
+        name: job.name,
+        schedule: job.schedule,
+        command: job.command,
+        priority: job.priority,
+        retryPolicy: job.retryPolicy,
+      });
     } catch (error) {
-      toast.error("Failed to create job: " + error.message);
+      toast.error("Failed to fetch job details");
+      navigate("/jobs");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      await jobsApi.updateJob(id, formData);
+      toast.success("Job updated successfully!");
+      navigate(`/jobs/${id}`);
+    } catch (error) {
+      toast.error("Failed to update job: " + error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -40,23 +62,20 @@ const NewJob = () => {
     }));
   };
 
-  const handleDependencyChange = (e) => {
-    const selectedOptions = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
     );
-    setFormData((prev) => ({
-      ...prev,
-      dependencies: selectedOptions,
-    }));
-  };
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Create New Job
+            Edit Job
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -75,7 +94,6 @@ const NewJob = () => {
                 onChange={handleChange}
                 required
                 className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter job name"
               />
             </div>
 
@@ -94,7 +112,6 @@ const NewJob = () => {
                 onChange={handleChange}
                 required
                 className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="* * * * *"
               />
               <CronHelper />
             </div>
@@ -114,7 +131,6 @@ const NewJob = () => {
                 onChange={handleChange}
                 required
                 className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="script:/path/to/script.js or http://api.example.com/endpoint"
               />
             </div>
 
@@ -157,93 +173,20 @@ const NewJob = () => {
               />
             </div>
 
-            {/* Dependencies Field */}
-            <div>
-              <label
-                htmlFor="dependencies"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Dependencies (Optional)
-              </label>
-              <select
-                id="dependencies"
-                name="dependencies"
-                multiple
-                value={formData.dependencies}
-                onChange={handleDependencyChange}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                size="4"
-              >
-                <option value="">No dependencies</option>
-                {jobs
-                  .filter(
-                    (job) =>
-                      job.status === "success" || job.status === "pending"
-                  )
-                  .map((job) => (
-                    <option key={job._id} value={job._id}>
-                      {job.name} ({job.status})
-                    </option>
-                  ))}
-              </select>
-              <p className="mt-1 text-sm text-gray-500">
-                Hold Ctrl/Cmd to select multiple jobs. This job will only run
-                after selected jobs complete successfully.
-              </p>
-            </div>
-
-            {/* Show selected dependencies */}
-            {formData.dependencies.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selected Dependencies:
-                </label>
-                <div className="space-y-2">
-                  {formData.dependencies.map((depId) => {
-                    const depJob = jobs.find((j) => j._id === depId);
-                    return depJob ? (
-                      <div
-                        key={depId}
-                        className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
-                      >
-                        <span className="text-sm font-medium">
-                          {depJob.name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              dependencies: prev.dependencies.filter(
-                                (id) => id !== depId
-                              ),
-                            }))
-                          }
-                          className="text-red-600 hover:text-red-800 text-sm"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            )}
-
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => navigate("/jobs")}
+                onClick={() => navigate(`/jobs/${id}`)}
                 className="bg-gray-200 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={saving}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                {loading ? "Creating..." : "Create Job"}
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>
@@ -253,4 +196,4 @@ const NewJob = () => {
   );
 };
 
-export default NewJob;
+export default JobEdit;

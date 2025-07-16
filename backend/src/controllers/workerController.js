@@ -142,7 +142,7 @@ class WorkerManager {
         consecutiveFailures: 0,
       },
 
-      // Additional workers for testing edge cases
+      // Test workers - Only these will be offline/busy initially
       {
         id: "worker-11",
         status: "offline", // Initially offline for testing
@@ -171,6 +171,23 @@ class WorkerManager {
       },
     ];
     this.workerTimeout = 300000; // 5 minutes
+    console.log(
+      "WorkerManager initialized with",
+      this.workers.length,
+      "workers"
+    );
+    this.logWorkerStatus();
+  }
+
+  // Add debugging method
+  logWorkerStatus() {
+    console.log("\n=== Worker Status Summary ===");
+    this.workers.forEach((worker) => {
+      console.log(
+        `${worker.id}: ${worker.status} (${worker.capabilities.join(", ")})`
+      );
+    });
+    console.log("===============================\n");
   }
 
   detectJobType(command) {
@@ -186,17 +203,40 @@ class WorkerManager {
   }
 
   getCompatibleWorker(requiredCapability) {
-    this.updateWorkerHealth();
-
-    const availableWorkers = this.workers.filter(
-      (worker) =>
-        worker.status === "idle" &&
-        worker.capabilities.includes(requiredCapability)
+    console.log(
+      `\n🔍 Looking for workers with capability: ${requiredCapability}`
     );
+
+    // Don't update health here - let's be explicit about when we do it
+    // this.updateWorkerHealth();
+
+    const compatibleWorkers = this.workers.filter((worker) =>
+      worker.capabilities.includes(requiredCapability)
+    );
+
+    console.log(
+      `Found ${compatibleWorkers.length} compatible workers:`,
+      compatibleWorkers.map((w) => `${w.id}(${w.status})`).join(", ")
+    );
+
+    const availableWorkers = compatibleWorkers.filter(
+      (worker) => worker.status === "idle"
+    );
+
+    console.log(`Available workers: ${availableWorkers.length}`);
 
     if (availableWorkers.length === 0) {
       console.log(
-        `No available workers with capability: ${requiredCapability}`
+        `❌ No available workers with capability: ${requiredCapability}`
+      );
+      console.log(
+        "Compatible workers status:",
+        compatibleWorkers.map(
+          (w) =>
+            `${w.id}: ${w.status} (last ping: ${new Date(
+              w.lastPing
+            ).toLocaleTimeString()})`
+        )
       );
       return null;
     }
@@ -211,7 +251,7 @@ class WorkerManager {
     });
 
     console.log(
-      `Selected worker ${selectedWorker.id} for capability: ${requiredCapability}`
+      `✅ Selected worker ${selectedWorker.id} for capability: ${requiredCapability}`
     );
     return selectedWorker;
   }
@@ -236,13 +276,16 @@ class WorkerManager {
   }
 
   assignJob(workerId, jobId, command = null) {
+    console.log(`\n🎯 Attempting to assign job ${jobId} to worker ${workerId}`);
+
+    // Update worker health before assignment
     this.updateWorkerHealth();
 
     const worker = this.workers.find((w) => w.id === workerId);
 
     if (!worker) {
       const error = `Worker ${workerId} not found`;
-      console.error(error);
+      console.error("❌", error);
       return {
         success: false,
         error,
@@ -251,9 +294,11 @@ class WorkerManager {
       };
     }
 
+    console.log(`Worker ${workerId} current status: ${worker.status}`);
+
     if (worker.status !== "idle") {
       const error = `Worker ${workerId} is not available (status: ${worker.status})`;
-      console.error(error);
+      console.error("❌", error);
       return {
         success: false,
         error,
@@ -264,6 +309,9 @@ class WorkerManager {
 
     if (command) {
       const requiredCapability = this.detectJobType(command);
+      console.log(`Job requires capability: ${requiredCapability}`);
+      console.log(`Worker capabilities: ${worker.capabilities.join(", ")}`);
+
       if (!worker.capabilities.includes(requiredCapability)) {
         const compatibleWorkers =
           this.getCompatibleWorkerIds(requiredCapability);
@@ -273,7 +321,7 @@ class WorkerManager {
         });
 
         const error = `Worker ${workerId} doesn't support '${requiredCapability}' commands`;
-        console.error(error);
+        console.error("❌", error);
         return {
           success: false,
           error,
@@ -281,17 +329,22 @@ class WorkerManager {
           availableCompatibleWorkers,
           workerStatus: this.getWorkerStatus(workerId),
           clusterStatus: this.getClusterHealthSummary(),
+          suggestions:
+            availableCompatibleWorkers.length > 0
+              ? `Try assigning to: ${availableCompatibleWorkers.join(", ")}`
+              : "No compatible workers currently available",
         };
       }
     }
 
+    // Assignment successful
     worker.status = "busy";
     worker.currentJob = jobId;
     worker.lastPing = new Date();
     worker.lastOnline = new Date();
 
     const message = `Job ${jobId} assigned to worker ${workerId}`;
-    console.log(message);
+    console.log("✅", message);
     return {
       success: true,
       message,
@@ -412,39 +465,81 @@ class WorkerManager {
 
   updateWorkerHealth() {
     const now = new Date();
+    let updatedWorkers = 0;
+
     this.workers.forEach((worker) => {
       const timeSinceLastPing = now - worker.lastPing;
+      const oldStatus = worker.status;
 
+      // Don't mark busy workers as offline
       if (timeSinceLastPing > this.workerTimeout && worker.status !== "busy") {
         if (worker.status !== "offline") {
-          console.log(`Marking worker ${worker.id} as offline`);
+          console.log(
+            `⚠️  Marking worker ${worker.id} as offline (last ping: ${new Date(
+              worker.lastPing
+            ).toLocaleTimeString()})`
+          );
+          updatedWorkers++;
         }
         worker.status = "offline";
       } else if (worker.status === "offline" && timeSinceLastPing < 30000) {
-        console.log(`Worker ${worker.id} back online`);
+        console.log(`✅ Worker ${worker.id} back online`);
         worker.status = "idle";
         worker.lastOnline = now;
+        updatedWorkers++;
       }
     });
+
+    if (updatedWorkers > 0) {
+      console.log(`Updated ${updatedWorkers} worker statuses`);
+      this.logWorkerStatus();
+    }
   }
 
+  // Add method to manually reset all workers to idle (for testing)
+  resetAllWorkersToIdle() {
+    console.log("🔄 Resetting all workers to idle status");
+    this.workers.forEach((worker) => {
+      if (worker.id !== "worker-11") {
+        // Keep worker-11 offline for testing
+        worker.status = "idle";
+        worker.currentJob = null;
+        worker.lastPing = new Date();
+        worker.lastOnline = new Date();
+      }
+    });
+    this.logWorkerStatus();
+  }
+
+  // Enhanced cluster stats with more debugging info
   getClusterStats() {
     const totalWorkers = this.workers.length;
     const activeWorkers = this.workers.filter(
       (w) => w.status !== "offline"
     ).length;
     const busyWorkers = this.workers.filter((w) => w.status === "busy").length;
+    const idleWorkers = this.workers.filter((w) => w.status === "idle").length;
+    const offlineWorkers = this.workers.filter(
+      (w) => w.status === "offline"
+    ).length;
 
     return {
       totalWorkers,
       activeWorkers,
       busyWorkers,
-      idleWorkers: activeWorkers - busyWorkers,
-      offlineWorkers: totalWorkers - activeWorkers,
+      idleWorkers,
+      offlineWorkers,
       capabilityStats: {
         script: this.getCompatibleWorkerIds("script").length,
         api: this.getCompatibleWorkerIds("api").length,
         shell: this.getCompatibleWorkerIds("shell").length,
+      },
+      workerStatusBreakdown: {
+        idle: this.workers.filter((w) => w.status === "idle").map((w) => w.id),
+        busy: this.workers.filter((w) => w.status === "busy").map((w) => w.id),
+        offline: this.workers
+          .filter((w) => w.status === "offline")
+          .map((w) => w.id),
       },
     };
   }
@@ -456,11 +551,34 @@ const workerManager = new WorkerManager();
 module.exports = {
   workerManager,
 
-  getAllWorkers: (req, res) => {
-    workerManager.updateWorkerHealth();
+  // Add debug endpoint
+  resetWorkers: (req, res) => {
+    workerManager.resetAllWorkersToIdle();
     res.json({
+      message: "All workers reset to idle",
       workers: workerManager.getAllWorkers(),
       clusterStats: workerManager.getClusterStats(),
+    });
+  },
+
+  getAllWorkers: (req, res) => {
+    workerManager.updateWorkerHealth();
+    const stats = workerManager.getClusterStats();
+
+    console.log(
+      "\n📊 Current Cluster Status:\n" +
+        `Total: ${stats.totalWorkers}, Active: ${stats.activeWorkers}, Idle: ${stats.idleWorkers}, Busy: ${stats.busyWorkers}, Offline: ${stats.offlineWorkers}`
+    );
+    console.log("Idle workers:", stats.workerStatusBreakdown.idle.join(", "));
+    console.log("Busy workers:", stats.workerStatusBreakdown.busy.join(", "));
+    console.log(
+      "Offline workers:",
+      stats.workerStatusBreakdown.offline.join(", ")
+    );
+
+    res.json({
+      workers: workerManager.getAllWorkers(),
+      clusterStats: stats,
     });
   },
 

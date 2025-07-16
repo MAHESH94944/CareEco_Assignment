@@ -28,7 +28,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("API Error:", error.response?.data || error.message);
-    return Promise.reject(error);
+    const message =
+      error.response?.data?.error || error.message || "An error occurred";
+    return Promise.reject(new Error(message));
   }
 );
 
@@ -85,7 +87,7 @@ export const jobsApi = {
 
 // Worker API endpoints
 export const workersApi = {
-  // Get all workers
+  // Get all workers with cluster stats
   getWorkers: async () => {
     const response = await api.get("/workers");
     return response.data;

@@ -5,6 +5,9 @@ import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
 import Workers from "./pages/Workers";
 import NewJob from "./pages/Jobs/NewJob";
+import JobEdit from "./pages/Jobs/JobEdit";
+import JobDetails from "./components/jobs/JobDetails";
+import WorkerAssignment from "./components/workers/WorkerAssignment";
 import Navbar from "./components/shared/Navbar";
 import Sidebar from "./components/shared/Sidebar";
 
@@ -20,7 +23,10 @@ const App = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/jobs/new" element={<NewJob />} />
+              <Route path="/jobs/:id" element={<JobDetails />} />
+              <Route path="/jobs/:id/edit" element={<JobEdit />} />
               <Route path="/workers" element={<Workers />} />
+              <Route path="/workers/assign" element={<WorkerAssignment />} />
             </Routes>
           </main>
         </div>

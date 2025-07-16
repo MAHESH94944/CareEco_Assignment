@@ -71,11 +71,25 @@ async function runJob(job, workerId) {
 
 async function checkDependencies(job) {
   if (!job.dependencies || job.dependencies.length === 0) {
-    return true;
+    return { canRun: true, reason: "No dependencies" };
   }
 
   const dependencies = await Job.find({ _id: { $in: job.dependencies } });
-  return dependencies.every((dep) => dep.status === "success");
+  const failedDependencies = dependencies.filter(
+    (dep) => dep.status !== "success"
+  );
+
+  if (failedDependencies.length > 0) {
+    const failedNames = failedDependencies.map(
+      (dep) => `${dep.name} (${dep.status})`
+    );
+    return {
+      canRun: false,
+      reason: `Waiting for dependencies: ${failedNames.join(", ")}`,
+    };
+  }
+
+  return { canRun: true, reason: "All dependencies met" };
 }
 
 async function processJobs() {
@@ -84,17 +98,20 @@ async function processJobs() {
     const jobs = await Job.find({
       status: { $in: ["pending"] },
       nextRun: { $lte: new Date() },
-    }).sort({
-      priority: 1,
-    });
+    })
+      .populate("dependencies", "name status")
+      .sort({
+        priority: 1,
+      });
 
     // Custom priority sorting
     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
     jobs.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
     for (const job of jobs) {
-      const canRun = await checkDependencies(job);
-      if (canRun) {
+      const dependencyCheck = await checkDependencies(job);
+
+      if (dependencyCheck.canRun) {
         // Detect job type and find compatible worker
         const jobType = workerManager.detectJobType(job.command);
         const availableWorker = workerManager.getCompatibleWorker(jobType);
@@ -139,7 +156,7 @@ async function processJobs() {
           }
         }
       } else {
-        console.log(`Job ${job.name} waiting for dependencies`);
+        console.log(`Job ${job.name}: ${dependencyCheck.reason}`);
       }
     }
   } catch (error) {

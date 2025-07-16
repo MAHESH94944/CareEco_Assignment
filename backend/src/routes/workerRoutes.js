@@ -2,22 +2,25 @@ const express = require("express");
 const router = express.Router();
 const workerController = require("../controllers/workerController");
 
-// Get all workers with cluster information
+// Get all workers
 router.get("/", workerController.getAllWorkers);
 
-// Get comprehensive cluster statistics
-router.get("/stats", workerController.getClusterStats);
-
-// Get workers by specific capability
-router.get("/capability/:type", workerController.getWorkersByCapability);
-
-// Get specific worker status
+// Get worker by ID
 router.get("/:id", workerController.getWorkerStatus);
 
-// Manually assign job to worker
+// Get cluster statistics
+router.get("/stats", workerController.getClusterStats);
+
+// Get workers by capability
+router.get("/capability/:type", workerController.getWorkersByCapability);
+
+// Assign job to worker
 router.post("/assign", workerController.assignJobToWorker);
 
-// Release worker from current job
+// Release worker
 router.post("/:id/release", workerController.releaseWorker);
+
+// DEBUG: Reset all workers to idle (for testing)
+router.post("/debug/reset", workerController.resetWorkers);
 
 module.exports = router;

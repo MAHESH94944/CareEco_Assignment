@@ -22,13 +22,39 @@ exports.createJob = async (req, res) => {
       return res.status(400).json({ error: "Invalid cron expression" });
     }
 
-    // Validate dependencies exist
+    // Validate and process dependencies
+    let processedDependencies = [];
     if (dependencies && dependencies.length > 0) {
-      const dependentJobs = await Job.find({ _id: { $in: dependencies } });
-      if (dependentJobs.length !== dependencies.length) {
-        return res
-          .status(400)
-          .json({ error: "One or more dependencies not found" });
+      // Filter out empty strings and invalid IDs
+      const validDependencies = dependencies.filter(
+        (dep) => dep && dep.trim() !== ""
+      );
+
+      if (validDependencies.length > 0) {
+        const dependentJobs = await Job.find({
+          _id: { $in: validDependencies },
+        });
+        if (dependentJobs.length !== validDependencies.length) {
+          return res.status(400).json({
+            error: "One or more dependencies not found",
+            requestedDependencies: validDependencies.length,
+            foundDependencies: dependentJobs.length,
+          });
+        }
+
+        // Check for circular dependencies
+        const circularCheck = await checkCircularDependencies(
+          validDependencies,
+          name
+        );
+        if (circularCheck.hasCircular) {
+          return res.status(400).json({
+            error: "Circular dependency detected",
+            circularPath: circularCheck.path,
+          });
+        }
+
+        processedDependencies = validDependencies;
       }
     }
 
@@ -37,7 +63,7 @@ exports.createJob = async (req, res) => {
       schedule,
       command,
       priority: priority || "Medium",
-      dependencies: dependencies || [],
+      dependencies: processedDependencies,
       retryPolicy: retryPolicy || 0,
       retriesLeft: retryPolicy || 0,
       nextRun: calculateNextRun(schedule),
@@ -45,6 +71,10 @@ exports.createJob = async (req, res) => {
     });
 
     await job.save();
+
+    // Populate dependencies for response
+    await job.populate("dependencies", "name status");
+
     res.status(201).json({
       message: "Job created successfully",
       job: job,
@@ -53,6 +83,38 @@ exports.createJob = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+// Helper function to check for circular dependencies
+async function checkCircularDependencies(
+  dependencies,
+  jobName,
+  visited = new Set()
+) {
+  if (visited.has(jobName)) {
+    return {
+      hasCircular: true,
+      path: Array.from(visited).join(" -> ") + " -> " + jobName,
+    };
+  }
+
+  visited.add(jobName);
+
+  const dependentJobs = await Job.find({ _id: { $in: dependencies } });
+  for (const depJob of dependentJobs) {
+    if (depJob.dependencies && depJob.dependencies.length > 0) {
+      const result = await checkCircularDependencies(
+        depJob.dependencies.map((id) => id.toString()),
+        depJob.name,
+        new Set(visited)
+      );
+      if (result.hasCircular) {
+        return result;
+      }
+    }
+  }
+
+  return { hasCircular: false };
+}
 
 exports.getAllJobs = async (req, res) => {
   try {

@@ -58,35 +58,97 @@ const navigation = [
       </svg>
     ),
   },
+  {
+    name: "Assignment",
+    href: "/workers/assign",
+    icon: (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+        />
+      </svg>
+    ),
+  },
 ];
 
 const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col w-64 bg-gray-900">
-      <div className="flex items-center justify-center h-16 bg-gray-800">
-        <h1 className="text-white text-lg font-bold">Job Scheduler</h1>
-      </div>
-      <nav className="flex-1 px-4 py-4 space-y-2">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                isActive
-                  ? "bg-gray-800 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
-              }`}
+    <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col transform translate-x-0 transition-transform duration-300">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-800">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+            <svg
+              className="w-5 h-5 text-gray-300"
+              fill="currentColor"
+              viewBox="0 0 24 24"
             >
-              <span className="mr-3">{item.icon}</span>
-              {item.name}
-            </Link>
-          );
-        })}
+              <path d="M12 2L2 7v10c0 5.55 3.84 9.95 9 11 5.16-1.05 9-5.45 9-11V7l-10-5z" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-white">Job Scheduler</h2>
+            <p className="text-xs text-gray-400">v1.0.0</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6">
+        <div className="space-y-2">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`group flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105 ${
+                  isActive
+                    ? "bg-gray-800 text-white border-l-4 border-blue-500 shadow-lg"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white hover:shadow-md"
+                }`}
+              >
+                <span
+                  className={`mr-3 transition-colors duration-200 ${
+                    isActive
+                      ? "text-blue-400"
+                      : "text-gray-400 group-hover:text-gray-300"
+                  }`}
+                >
+                  {item.icon}
+                </span>
+                {item.name}
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-800">
+        <div className="flex items-center space-x-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center animate-pulse">
+            <div className="w-3 h-3 bg-white rounded-full"></div>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-white">System Status</p>
+            <p className="text-xs text-green-400">All systems operational</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
