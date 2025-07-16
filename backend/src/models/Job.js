@@ -18,7 +18,7 @@ const jobSchema = new mongoose.Schema(
       required: true,
       trim: true,
       maxlength: 200,
-      index: true,
+      // Remove index: true from here since we're defining it separately below
     },
 
     // Cron-like schedule - supports standard cron expressions
@@ -95,7 +95,7 @@ const jobSchema = new mongoose.Schema(
         message: "Status must be pending, running, success, or failed",
       },
       default: "pending",
-      index: true,
+      // Remove index: true from here since we're defining it separately below
     },
 
     // Scheduling timestamps
@@ -179,7 +179,8 @@ const jobSchema = new mongoose.Schema(
 // Indexes for better query performance
 jobSchema.index({ status: 1, nextRun: 1 }); // For scheduler queries
 jobSchema.index({ dependencies: 1 }); // For dependency checking
-jobSchema.index({ name: 1 }, { unique: true }); // Ensure unique job names
+jobSchema.index({ name: 1 }, { unique: true }); // Ensure unique job names - keep this one
+jobSchema.index({ status: 1 }); // Add this for status queries
 
 // Pre-save middleware to set retriesLeft when retryPolicy changes
 jobSchema.pre("save", function (next) {
